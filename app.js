@@ -12,13 +12,17 @@ const app = express()
 const FormData = require('form-data');
 const { Readable } = require('stream');
 
-const functions = require('@google-cloud/functions-framework');
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
+const port = 3000
 
-functions.http('leerArchivo', upload.single('archivo_new'), async (req, res) => {
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
+app.post('/', upload.single('archivo_new'), async (req, res) => {
     try {
         const content = req.file.buffer.toString('utf-8');
         const modifiedContent = content + '\n Modificado gpc';
@@ -33,7 +37,7 @@ functions.http('leerArchivo', upload.single('archivo_new'), async (req, res) => 
             filename: 'archivo_new.txt'
         });
 
-        const response = await axios.post('http://localhost:3001/', form, {
+        const response = await axios.post('https://save-file-txt.azurewebsites.net/api/http_trigger', form, {
             headers: {
                 ...form.getHeaders()
             }
@@ -47,8 +51,6 @@ functions.http('leerArchivo', upload.single('archivo_new'), async (req, res) => 
     }
 });
 
-const port = 3000;
-
 app.listen(port, () => {
-    console.log('listening on port' + port);
+    console.log(`Example app listening on port ${port}`)
 })
